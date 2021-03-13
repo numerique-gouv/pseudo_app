@@ -1,7 +1,6 @@
 FROM continuumio/miniconda3
 
 WORKDIR usr/src/pseudo_app
-RUN apt-get update && apt-get install antiword
 ADD environment.yml environment.yml
 
 RUN conda env create -f environment.yml

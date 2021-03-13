@@ -27,7 +27,7 @@ def app_page_layout(page_layout, app_title="Etalab Pseudo", light_logo=False):
                         children=[
                             'Voir sur Github'
                         ],
-                        href="https://github.com/psorianom/pseudo_app",
+                        href="https://github.com/etalab-ia/pseudo_app",
                         style={'color': 'white' if light_logo else 'black',
                                'border': 'solid 1px white' if light_logo else 'solid 1px black'},
                         target="_blank"
