@@ -104,6 +104,7 @@ def create_upload_tab_html_output(text, tagger, word_tokenizer=None, pseudo_api_
     splitted_text = [t.strip() for t in text.split("\n") if t.strip()]
     if pseudo_api_url:
         conll_tagged = request_pseudo_api(text=text, pseudo_api_url=pseudo_api_url)
+        print(conll_tagged)
         if not conll_tagged:
             return None
         sentences_tagged = create_flair_corpus(conll_tagged)
