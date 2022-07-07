@@ -38,7 +38,7 @@ You do need to train a NER model with the [Flair library](https://github.com/fla
 The easiest way to run this application is by using Docker and Docker Compose.
 
 1. Clone this repo (for help see this [tutorial](https://help.github.com/articles/cloning-a-repository/)).
-2. Add the path of the local model to the `.env` file. Note that you could also pass this env var to the app directly and you would not need run the API.
+2. Create a .env file in the repo folder and indicates there the path of the local model to the `.env` file  (variable : PSEUDO_MODEL_PATH) + the path of the API database (variable : PSEUDO_API_DB_PATH) + the url of the API (variable : PSEUDO_REST_API_URL). Note that you could also pass this env var to the app directly and you would not need run the API.
 3. Launch the wrapper bash file `run_docker.sh`. This file will clean and rebuild the required Docker containers by calling `docker-compose.yml`.
 4. Go to `localhost/pseudo/`
 
