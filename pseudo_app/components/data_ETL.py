@@ -45,7 +45,7 @@ def prepare_upload_tab_html(sentences_tagged, original_text_lines):
                 temp_list.append(original_text[i_sent][index:])
                 html_components.append(html.P(temp_list))
         return html_components
-
+    print(type(sentences_pseudonymized))
     for id_sn, sent in enumerate(sentences_pseudonymized):
         for sent_span in sent.get_spans("ner"):
             if "LOC" in sent_span.tag:
@@ -87,10 +87,13 @@ def create_flair_corpus(conll_tagged: str):
 
 def request_pseudo_api(text: str, pseudo_api_url: str):
     payload = {"text": text, "output_type": "conll"}
-    r = requests.post(pseudo_api_url, payload).json()
-    if r["success"]:
-        return r["text"]
-
+    try:
+        r = requests.post(pseudo_api_url, payload).json()
+        if r["success"]:
+            return r["text"]
+    except:
+        t = str(pseudo_api_url) + str(payload) + str(requests.post(pseudo_api_url, payload))
+        raise Exception(t)
 
 def request_stats_api(pseudo_api_url: str):
     if not pseudo_api_url:
@@ -107,7 +110,9 @@ def create_upload_tab_html_output(text, tagger, word_tokenizer=None, pseudo_api_
         print(conll_tagged)
         if not conll_tagged:
             return None
-        sentences_tagged = create_flair_corpus(conll_tagged)
+        sentences_tagged=conll_tagged
+ #      sentences_tagged = create_flair_corpus(conll_tagged)
+  #      print(sentences_tagged)
     else:
         if not word_tokenizer:
             tokenizer = MOSES_TOKENIZER

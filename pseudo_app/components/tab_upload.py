@@ -13,6 +13,7 @@ from components.data_ETL import load_text, create_upload_tab_html_output
 # Env variables
 PSEUDO_REST_API_URL = os.environ.get('PSEUDO_REST_API_URL', '')
 PSEUDO_MODEL_PATH = os.environ.get('PSEUDO_MODEL_PATH', '')
+PSEUDO_MODEL_PATH = "flair/ner-french"
 TAGGER = None
 if not PSEUDO_REST_API_URL and not PSEUDO_MODEL_PATH:
     print("Neither the pseudonymization service nor a trained model are available. We cannot continue :(")

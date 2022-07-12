@@ -162,4 +162,4 @@ def prepare_error_pane():
     return html_components, list_stats_errors, list_stats_datasets
 
 
-ERROR_PANE_TAGGED_TEXT, ERROR_PANE_TEXT_STATS, DATASETS_STATS = prepare_error_pane()
+#ERROR_PANE_TAGGED_TEXT, ERROR_PANE_TEXT_STATS, DATASETS_STATS = prepare_error_pane()
