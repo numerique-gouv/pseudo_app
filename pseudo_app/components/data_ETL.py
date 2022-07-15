@@ -5,21 +5,55 @@ import re
 import subprocess
 from pathlib import Path
 from string import ascii_uppercase
-from typing import Callable, List
 from hashlib import md5
+from typing import Tuple
 
 import dash_html_components as html
 import pandas as pd
 import textract
 from flair.data import Token
+from typing import List
 from flair.datasets import ColumnDataset
-from sacremoses import MosesTokenizer, MosesDetokenizer, MosesPunctNormalizer
 import requests
+import xml.etree.ElementTree as ET
 
-detokenizer_fr = MosesDetokenizer(lang="fr")
+
+def prepare_upload_tab_html(
+    tags:str,
+    pseudo: str,
+):
+    """
+    Build Dash frontend to display tags
+
+    Args:
+        tags (str): _description_
+        pseudo (str): _description_
+        original_text_lines (str): _description_
+    """
+
+    def generate_upload_tab_html_components(tagged_text: str):
+        html_components = []
+        root = ET.fromstring(tagged_text)
+        for child in root: # normaly every of these "first-degree-children" must be sentences
+            if child.tag == "sentence":
+                if not len(child.tag): # = no grandchildren. It should not happen with API, as "not entity" text is wrapped in tag <a>
+                    html_components.append(html.P(child.text))
+                else:
+                    marked_content = []
+                    for grandchild in child:
+                        if grandchild.tag == "a":
+                            marked_content.append(grandchild.text)
+                        elif grandchild.tag:
+                            marked_content.append(children=grandchild.text, **{"data-entity": ENTITIES[grandchild.tag], "data-index": ""})
+                    html_components.append(html.P(marked_content))
+        return html_components
+
+    html_components_pseudo =  html.P(pseudo)
+    html_components_tagged = generate_upload_tab_html_components(tagged_text=tags)
+    return html_components_tagged, html_components_pseudo
 
 
-def prepare_upload_tab_html(sentences_tagged, original_text_lines):
+def prepare_upload_tab_html_2(sentences_tagged:str, original_text_lines):
     singles = [f"{letter}..." for letter in ascii_uppercase]
     doubles = [f"{a}{b}..." for a, b in list(itertools.combinations(ascii_uppercase, 2))]
     pseudos = singles + doubles
@@ -84,15 +118,21 @@ def create_flair_corpus(conll_tagged: str):
         temp_conll_file.unlink()
 
 
-def request_pseudo_api(text: str, pseudo_api_url: str):
-    payload = {"text": text, "output_type": "pseudonymized"}
+def request_pseudo_api(text: str, pseudo_api_url: str) -> str:
     try:
-        r = requests.post(pseudo_api_url, payload).json()
+        r = requests.post(pseudo_api_url, {"text": text}).json()
         if r["success"]:
-            return r["text"]
-    except:
-        t = str(pseudo_api_url) + str(payload) + str(requests.post(pseudo_api_url, payload))
-        raise Exception(t)
+            return r["pseudo"]
+    except Exception as e:
+        raise e
+
+def request_tags_api(text: str, pseudo_api_url: str) -> Tuple[str, str]:
+    try:
+        r = requests.post(pseudo_api_url, {"text": text}).json()
+        if r["success"]:
+            return r["tags"], r["pseudo"]
+    except Exception as e:
+        raise e
 
 def request_stats_api(pseudo_api_url: str):
     if not pseudo_api_url:
@@ -102,19 +142,13 @@ def request_stats_api(pseudo_api_url: str):
         return r["stats_info"]
 
 
-def create_upload_tab_html_output(text, tagger, word_tokenizer=None, pseudo_api_url=None):
-    splitted_text = [t.strip() for t in text.split("\n") if t.strip()]
-    if pseudo_api_url:
-        text = request_pseudo_api(text=text, pseudo_api_url=pseudo_api_url)
-        sentences_tagged = tagger.predict(sentences=splitted_text,
-                                          mini_batch_size=32,
-                                          embedding_storage_mode="none",
-                                          verbose=True)
-
-    html_pseudoynmized, html_tagged = prepare_upload_tab_html(sentences_tagged=sentences_tagged,
-                                                              original_text_lines=splitted_text)
-
-    return html_pseudoynmized, html_tagged
+def create_upload_tab_html_output(text:str, pseudo_api_url:str):
+    tags, pseudo = request_pseudo_api(text=text, pseudo_api_url=pseudo_api_url+"tags/")
+    html_tagged, html_pseudoynmized = prepare_upload_tab_html(
+        tags=tags,
+        pseudo=pseudo
+    )
+    return html_tagged, html_pseudoynmized 
 
 
 def file2txt(doc_path: str) -> str:
@@ -130,95 +164,7 @@ def load_text(doc_path: Path) -> str:
     return file2txt(doc_path.as_posix())
 
 
-ENTITIES = {"PER_PRENOM": "PRENOM", "PER_NOM": "NOM", "LOC": "ADRESSE"}
-
-
-class MosesTokenizerSpans(MosesTokenizer):
-    def __init__(self, lang="en", custom_nonbreaking_prefixes_file=None):
-        MosesTokenizer.__init__(self, lang=lang,
-                                custom_nonbreaking_prefixes_file=custom_nonbreaking_prefixes_file)
-        self.lang = lang
-
-    def span_tokenize(
-            self,
-            text,
-            aggressive_dash_splits=False,
-            escape=True,
-            protected_patterns=None,
-    ):
-        # https://stackoverflow.com/a/35634472
-        import re
-        detokenizer = MosesDetokenizer(lang=self.lang)
-        tokens = self.tokenize(text=text, aggressive_dash_splits=aggressive_dash_splits,
-                               return_str=False, escape=escape,
-                               protected_patterns=protected_patterns)
-        tail = text
-        accum = 0
-        tokens_spans = []
-        for token in tokens:
-            detokenized_token = detokenizer.detokenize(tokens=[token],
-                                                       return_str=True,
-                                                       unescape=escape)
-            escaped_token = re.escape(detokenized_token)
-
-            m = re.search(escaped_token, tail)
-            tok_start_pos, tok_end_pos = m.span()
-            sent_start_pos = accum + tok_start_pos
-            sent_end_pos = accum + tok_end_pos
-            accum += tok_end_pos
-            tail = tail[tok_end_pos:]
-
-            tokens_spans.append((detokenized_token, (sent_start_pos, sent_end_pos)))
-        return tokens_spans
-
-
-def build_moses_tokenizer(tokenizer: MosesTokenizerSpans,
-                          normalizer: MosesPunctNormalizer = None) -> Callable[[str], List[Token]]:
-    """
-    Wrap Spacy model to build a tokenizer for the Sentence class.
-    :param model a Moses tokenizer instance
-    :return a tokenizer function to provide to Sentence class constructor
-    """
-    try:
-        from sacremoses import MosesTokenizer
-        from sacremoses import MosesPunctNormalizer
-    except ImportError:
-        raise ImportError(
-            "Please install sacremoses or better before using the Spacy tokenizer, otherwise you can use segtok_tokenizer as advanced tokenizer."
-        )
-
-    moses_tokenizer: MosesTokenizerSpans = tokenizer
-    if normalizer:
-        normalizer: MosesPunctNormalizer = normalizer
-
-    def tokenizer(text: str) -> List[Token]:
-        if normalizer:
-            text = normalizer.normalize(text=text)
-        doc = moses_tokenizer.span_tokenize(text=text, escape=False)
-        previous_token = None
-        tokens: List[Token] = []
-        for word, (start_pos, end_pos) in doc:
-            word: str = word
-            token = Token(
-                text=word, start_position=start_pos, whitespace_after=True
-            )
-            tokens.append(token)
-
-            if (previous_token is not None) and (
-                    token.start_pos - 1
-                    == previous_token.start_pos + len(previous_token.text)
-            ):
-                previous_token.whitespace_after = False
-
-            previous_token = token
-        return tokens
-
-    return tokenizer
-
-
-tokenizer_fr = MosesTokenizerSpans(lang="fr")
-MOSES_TOKENIZER = build_moses_tokenizer(tokenizer=tokenizer_fr)
-
+ENTITIES = {"PER_PRENOM": "PRENOM", "PER_NOM": "NOM", "LOC": "ADRESSE", "PER": "PERSONNE", "ORG": "ORGANISATION"}
 
 def sent_tokenizer(text):
     return text.split("\n")
