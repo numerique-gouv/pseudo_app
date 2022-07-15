@@ -85,7 +85,7 @@ def create_flair_corpus(conll_tagged: str):
 
 
 def request_pseudo_api(text: str, pseudo_api_url: str):
-    payload = {"text": text, "output_type": "conll"}
+    payload = {"text": text, "output_type": "pseudonymized"}
     try:
         r = requests.post(pseudo_api_url, payload).json()
         if r["success"]:
@@ -105,23 +105,10 @@ def request_stats_api(pseudo_api_url: str):
 def create_upload_tab_html_output(text, tagger, word_tokenizer=None, pseudo_api_url=None):
     splitted_text = [t.strip() for t in text.split("\n") if t.strip()]
     if pseudo_api_url:
-        conll_tagged = request_pseudo_api(text=text, pseudo_api_url=pseudo_api_url)
-        print(conll_tagged)
-        if not conll_tagged:
-            return None
-        sentences_tagged = create_flair_corpus(conll_tagged)
-        print(type(sentences_tagged))
-        print(sentences_tagged)
-    else:
-        if not word_tokenizer:
-            tokenizer = MOSES_TOKENIZER
-        else:
-            tokenizer = word_tokenizer
-
+        text = request_pseudo_api(text=text, pseudo_api_url=pseudo_api_url)
         sentences_tagged = tagger.predict(sentences=splitted_text,
                                           mini_batch_size=32,
                                           embedding_storage_mode="none",
-                                          use_tokenizer=tokenizer,
                                           verbose=True)
 
     html_pseudoynmized, html_tagged = prepare_upload_tab_html(sentences_tagged=sentences_tagged,
