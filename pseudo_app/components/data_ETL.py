@@ -33,19 +33,21 @@ def prepare_upload_tab_html(
 
     def generate_upload_tab_html_components(tagged_text: str):
         html_components = []
-        root = ET.fromstring(tagged_text)
-        for child in root: # normaly every of these "first-degree-children" must be sentences
-            if child.tag == "sentence":
-                if not len(child.tag): # = no grandchildren. It should not happen with API, as "not entity" text is wrapped in tag <a>
-                    html_components.append(html.P(child.text))
-                else:
-                    marked_content = []
-                    for grandchild in child:
-                        if grandchild.tag == "a":
-                            marked_content.append(grandchild.text)
-                        elif grandchild.tag:
-                            marked_content.append(children=grandchild.text, **{"data-entity": ENTITIES[grandchild.tag], "data-index": ""})
-                    html_components.append(html.P(marked_content))
+        print("tagged text", tagged_text)
+        if tagged_text:
+            root = ET.fromstring(tagged_text)
+            for child in root: # normaly every of these "first-degree-children" must be sentences
+                if child.tag == "sentence":
+                    if not len(child.tag): # = no grandchildren. It should not happen with API, as "not entity" text is wrapped in tag <a>
+                        html_components.append(html.P(child.text))
+                    else:
+                        marked_content = []
+                        for grandchild in child:
+                            if grandchild.tag == "a":
+                                marked_content.append(grandchild.text)
+                            elif grandchild.tag:
+                                marked_content.append(children=grandchild.text, **{"data-entity": ENTITIES[grandchild.tag], "data-index": ""})
+                        html_components.append(html.P(marked_content))
         return html_components
 
     html_components_pseudo =  html.P(pseudo)
