@@ -143,7 +143,7 @@ def request_stats_api(pseudo_api_url: str):
 
 
 def create_upload_tab_html_output(text:str, pseudo_api_url:str):
-    tags, pseudo = request_pseudo_api(text=text, pseudo_api_url=pseudo_api_url+"tags/")
+    tags, pseudo = request_tags_api(text=text, pseudo_api_url=pseudo_api_url+"tags/")
     html_tagged, html_pseudoynmized = prepare_upload_tab_html(
         tags=tags,
         pseudo=pseudo
