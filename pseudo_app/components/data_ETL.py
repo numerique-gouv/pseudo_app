@@ -46,7 +46,9 @@ def prepare_upload_tab_html(
                             if grandchild.tag == "a":
                                 marked_content.append(grandchild.text)
                             elif grandchild.tag:
-                                marked_content.append(children=grandchild.text, **{"data-entity": ENTITIES[grandchild.tag], "data-index": ""})
+                                marked_content.append(
+                                    html.Mark(children=grandchild.text, **{"data-entity": ENTITIES[grandchild.tag], "data-index": ""})
+                                )
                         html_components.append(html.P(marked_content))
         return html_components
 
