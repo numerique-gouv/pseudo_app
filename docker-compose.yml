@@ -3,7 +3,7 @@ services:
   pseudo_api:
     container_name: pseudo_api
     restart: always
-    build: https://github.com/etalab-ia/pseudo_api.git#:pseudo_api
+    build: https://github.com/etalab-ia/pseudo_api.git#flair-ner-french:pseudo_api
     ports:
       - "8011:8000"
     volumes:

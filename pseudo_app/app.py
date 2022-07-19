@@ -5,8 +5,6 @@ import dash
 
 from components.page_layout import app_page_layout
 from components.tab_about import tab_about_content
-from components.tab_errors import tab_errors_content, pane_errors_content, pane_errors_content_dynamic
-from components.tab_statistics import pane_statistics_content, tab_statistics_content
 from components.tab_upload import tab_upload_content, pane_upload_content
 
 from dash.dependencies import Input, Output, State
@@ -27,8 +25,6 @@ def layout():
                      dbc.Tabs(id='main-tabs', children=[
                          tab_about_content,
                          tab_upload_content,
-                         tab_errors_content,
-                         tab_statistics_content
                      ], active_tab="tab-about"),
                  )),
         dbc.Container(className="five columns", fluid=True,
@@ -48,9 +44,6 @@ def callbacks(_app):
     @_app.callback([Output("error-pane", 'children'),
                     Output("alert-stats", 'children')],
                    [Input('error-slider', 'value')])
-    def error_slider_update(value):
-        error_text_children, caption_children = pane_errors_content_dynamic(value)
-        return error_text_children, caption_children
 
     @_app.callback([Output('right-pane', 'children'),
                     Output('session-store', 'data')],
@@ -76,9 +69,6 @@ def callbacks(_app):
                     return children, data
             children, data = pane_upload_content(contents, file_name, n_clicks_example, data)
             data["previous_tab"] = tab_is_at
-            return children, data
-        elif tab_is_at == "tab-statistics":
-            children, data = pane_statistics_content(data)
             return children, data
 
 

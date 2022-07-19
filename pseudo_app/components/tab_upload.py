@@ -12,7 +12,10 @@ from components.data_ETL import load_text, create_upload_tab_html_output
 
 # Env variables
 PSEUDO_REST_API_URL = os.environ.get('PSEUDO_REST_API_URL', '')
+if not PSEUDO_REST_API_URL.endswith("/"):
+    PSEUDO_REST_API_URL += "/"
 PSEUDO_MODEL_PATH = os.environ.get('PSEUDO_MODEL_PATH', '')
+PSEUDO_MODEL_PATH = "flair/ner-french"
 TAGGER = None
 if not PSEUDO_REST_API_URL and not PSEUDO_MODEL_PATH:
     print("Neither the pseudonymization service nor a trained model are available. We cannot continue :(")
@@ -87,7 +90,7 @@ def pane_upload_content(contents, file_name, n_clicks, data):
                         style={"width": "100%", "display": "flex", "align-items": "center",
                                "justify-content": "center"}), data
 
-    html_pseudoynmized, html_tagged = create_upload_tab_html_output(text=decoded, tagger=TAGGER,
+    html_tagged, html_pseudoynmized  = create_upload_tab_html_output(text=decoded,
                                                                     pseudo_api_url=PSEUDO_REST_API_URL)
 
     pseudo_content = dbc.Card(dbc.CardBody(html_pseudoynmized),
