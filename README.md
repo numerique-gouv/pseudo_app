@@ -50,4 +50,4 @@ The easiest way to run this application is by using Docker and Docker Compose.
 
 
 ## Contact
-* Feel free to contact [@psorianom](https://github.com/psorianom/) or other [Lab IA](https://github.com/etalab-ia/) team members with any questions or if you are interested in contributing!
+* Feel free to contact [@pedevineau](https://github.com/pedevineau) or [@psorianom](https://github.com/psorianom/) or other [Lab IA](https://github.com/etalab-ia/) team members with any questions or if you are interested in contributing!
