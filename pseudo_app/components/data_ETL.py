@@ -45,7 +45,12 @@ def prepare_upload_tab_html(
                         html_components.append(html.P(marked_content))
         return html_components
 
-    html_components_pseudo =  [html.P(pseudo_sentence) for pseudo_sentence in re.split("\?|\.|\n|\!", pseudo)]
+    html_components_pseudo = []
+    for pseudo_sentence in re.split("\?|(?<=[A-Za-z0-9 ])\.(?!\.)|(?<=[A-Za-z0-9 ])\!(?!\!)", pseudo):
+        if pseudo_sentence:
+            html_components_pseudo.append(
+                html.P(pseudo_sentence)
+            )
     html_components_tagged = generate_upload_tab_html_components(tagged_text=tags)
     return html_components_tagged, html_components_pseudo
 
