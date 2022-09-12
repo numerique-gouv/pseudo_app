@@ -38,7 +38,7 @@ def prepare_upload_tab_html(
                         for grandchild in child:
                             if grandchild.tag == "a": # = this span does not contain recognized entities
                                 marked_content.append(grandchild.text)
-                            elif grandchild.tag: # = this span contain recognized entities
+                            elif grandchild.tag: # = this span contains recognized entities
                                 marked_content.append(
                                     html.Mark(children=grandchild.text, **{"data-entity": ENTITIES[grandchild.tag], "data-index": ""})
                                 )
@@ -46,10 +46,20 @@ def prepare_upload_tab_html(
         return html_components
 
     html_components_pseudo = []
+    # split after "?", after ".", but not after "...", after "!", but not after "!!!"
     for pseudo_sentence in re.split("\?|(?<=[A-Za-z0-9 ])\.(?!\.)|(?<=[A-Za-z0-9 ])\!(?!\!)", pseudo):
         if pseudo_sentence:
+            marked_content = []
+            pattern = r"[A-Z]{1,2}\.\.\."
+            marks = re.findall(pattern, pseudo_sentence)
+            normal_texts = re.split(pattern, pseudo_sentence)
+            for i in range(len(normal_texts)-1):
+                marked_content.append(normal_texts[i])
+                marked_content.append(html.Mark(children=marks[i]))
+            marked_content.append(normal_texts[-1])
+            
             html_components_pseudo.append(
-                html.P(pseudo_sentence)
+                html.P(marked_content)
             )
     html_components_tagged = generate_upload_tab_html_components(tagged_text=tags)
     return html_components_tagged, html_components_pseudo
