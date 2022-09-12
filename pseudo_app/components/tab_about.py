@@ -24,7 +24,7 @@ COMMENT = dcc.Markdown("""
 La pseudonymisation peut être vue comme un problème de traitement de langage naturel, plus particulièrement,
 comme une tache de [reconnaissance d'entités nommées](https://fr.wikipedia.org/wiki/Reconnaissance_d%27entit%C3%A9s_nomm%C3%A9es)
 (REN). La REN est souvent résolue à l'aide des méthodes d'apprentissage supervisé séquentiel. Cette démo utilise une approche de ce type : 
-nous avons entraîné un modèle de REN en utilisant des décisions de justice annotées indirectement (les annotations dans ces documents ne provienent pas d'une campagne d'annotation).
+nous utilisons un modèle de REN pour détecter des entités et identifier leur nature, puis nous appliquons une méthode de résolution d'entité minimaliste pour identifier si une entité est mentionnée plusieurs fois dans le texte sous des formes proches et remplacer l'ensemble de ces formes proches par une seule forme pseudonymisée.
 Le modèle est
 ensuite normalement capable de repérer des entités (noms, prènoms, adresses) dans des nouveaux documents. 
 

@@ -54,7 +54,7 @@ tab_upload_content = dbc.Tab(
 
 
 def pane_upload_content(contents, file_name, n_clicks, data):
-    if n_clicks is not None and n_clicks > data["n_clicks"]:
+    if n_clicks is not None and "n_clicks" in data and n_clicks > data["n_clicks"]:
         decoded = TEXTE_EXEMPLE
         content_id = md5(decoded.encode("utf-8")).hexdigest()
         data = data or {content_id: []}
