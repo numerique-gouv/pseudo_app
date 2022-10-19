@@ -35,9 +35,6 @@ ensuite normalement capable de repérer des entités (noms, prènoms, adresses) 
 UTILISER = dcc.Markdown("""
 * Vous pouvez uploader un document et ensuite regarder les entités repérées dans le texte ainsi que le texte pseudonymisé
 sur l'onglet **Pseudonymisez un document**.
-* La qualité de la reconnaissance automatique d'entités est directement liée à la qualité (et quantité) de documents annotés à la main. Trouvez un
-exemple de cette relation dans l'onglet **Volume des données annotées**.
-* Dans **Stats** nous affichons les statistiques d'utilisation de notre API de pseudonymisation.
 """)
 
 PLUSINFO = dcc.Markdown("""
